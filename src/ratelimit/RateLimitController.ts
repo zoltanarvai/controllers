@@ -117,11 +117,11 @@ export class RateLimitController<
 
     this.messagingSystem.registerActionHandler(
       `${name}:call` as const,
-      (
+      ((
         origin: string,
         type: keyof RateLimitedApis,
         ...args: Parameters<RateLimitedApis[keyof RateLimitedApis]>
-      ) => this.call(origin, type, ...args),
+      ) => this.call(origin, type, ...args)) as any,
     );
   }
 
@@ -133,10 +133,10 @@ export class RateLimitController<
    * @param args - Arguments for the API call.
    * @returns `false` if rate-limited, and `true` otherwise.
    */
-  async call(
+  async call<ApiType extends keyof RateLimitedApis>(
     origin: string,
-    type: keyof RateLimitedApis,
-    ...args: Parameters<RateLimitedApis[keyof RateLimitedApis]>
+    type: ApiType,
+    ...args: Parameters<RateLimitedApis[ApiType]>
   ): Promise<RateLimitWrapper> {
     if (this._isRateLimited(type, origin)) {
       return { isRateLimited: true };

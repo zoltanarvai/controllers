@@ -10,7 +10,10 @@ import {
 
 const name = 'RateLimitController';
 
-const implementations = { showNativeNotification: jest.fn() };
+const implementations = {
+  showNativeNotification: jest.fn(),
+  kaplar: (foo: string) => console.log(foo),
+};
 
 type RateLimitedApis = typeof implementations;
 
@@ -82,20 +85,28 @@ describe('RateLimitController', () => {
 
     const showNativeNotification = jest.fn();
     const controller = new RateLimitController({
-      implementations: { showNativeNotification },
+      implementations: {
+        showNativeNotification,
+        kaplar: (foo) => console.log(foo),
+      },
       messenger,
     });
     expect(
       await controller.call(origin, 'showNativeNotification', origin, message),
     ).toStrictEqual(successResult);
     expect(showNativeNotification).toHaveBeenCalledWith(origin, message);
+    // await controller.call(origin, 'kaplar', 2) // error
+    await controller.call(origin, 'kaplar', 'foo');
   });
 
   it('returns false if rate-limited', async () => {
     const messenger = getRestrictedMessenger();
     const showNativeNotification = jest.fn();
     const controller = new RateLimitController({
-      implementations: { showNativeNotification },
+      implementations: {
+        showNativeNotification,
+        kaplar: (foo) => console.log(foo),
+      },
       messenger,
       rateLimitCount: 1,
     });
@@ -115,7 +126,10 @@ describe('RateLimitController', () => {
     const messenger = getRestrictedMessenger();
     const showNativeNotification = jest.fn();
     const controller = new RateLimitController({
-      implementations: { showNativeNotification },
+      implementations: {
+        showNativeNotification,
+        kaplar: (foo) => console.log(foo),
+      },
       messenger,
       rateLimitCount: 1,
     });
