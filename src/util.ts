@@ -26,6 +26,7 @@ import { TypedMessageParams } from './message-manager/TypedMessageManager';
 import { Token } from './assets/TokenRatesController';
 import { MAINNET } from './constants';
 import { Json } from './BaseControllerV2';
+import { NetworksChainId } from '.';
 
 const hexRe = /^[0-9A-Fa-f]+$/gu;
 
@@ -931,5 +932,23 @@ export function isValidJson(value: unknown): value is Json {
     return deepEqual(value, JSON.parse(JSON.stringify(value)));
   } catch (_) {
     return false;
+  }
+}
+
+/**
+ * Check if token detection is enabled for certain networks
+ *
+ * @param chainId - ChainID of network
+ * @returns Whether the current network supports token detection
+ */
+export function isTokenDetectionEnabledForNetwork(chainId: string): boolean {
+  switch (chainId) {
+    case NetworksChainId.mainnet:
+    case NetworksChainId.avax:
+    case NetworksChainId.bsc:
+    case NetworksChainId.polygon:
+      return true;
+    default:
+      return false;
   }
 }
