@@ -5,7 +5,7 @@ import { BaseController, BaseConfig, BaseState } from '../BaseController';
 import { ERC721Standard } from './Standards/CollectibleStandards/ERC721/ERC721Standard';
 import { ERC1155Standard } from './Standards/CollectibleStandards/ERC1155/ERC1155Standard';
 import { ERC20Standard } from './Standards/ERC20Standard';
-import { NetworksChainId } from '..';
+import { NetworksChainId, NetworkState } from '../network/NetworkController';
 
 /**
  * Check if token detection is enabled for certain networks
@@ -33,6 +33,7 @@ const MISSING_PROVIDER_ERROR =
  */
 export interface AssetsContractConfig extends BaseConfig {
   provider: any;
+  chainId: string;
 }
 
 /**
@@ -68,18 +69,34 @@ export class AssetsContractController extends BaseController<
   /**
    * Creates a AssetsContractController instance.
    *
-   * @param config - Initial options used to configure this controller.
-   * @param state - Initial state to set on this controller.
+   * @param options.config - Initial options used to configure this controller.
+   * @param options.state - Initial state to set on this controller.
+   * @param options.onPreferencesStateChange - Allows subscribing to preferences controller state changes.
    */
-  constructor(
-    config?: Partial<AssetsContractConfig>,
-    state?: Partial<BaseState>,
-  ) {
+  constructor({
+    onNetworkStateChange,
+    config,
+    state,
+  }: {
+    onNetworkStateChange: (
+      listener: (networkState: NetworkState) => void,
+    ) => void;
+    config?: Partial<AssetsContractConfig>;
+    state?: Partial<BaseState>;
+  }) {
     super(config, state);
     this.defaultConfig = {
       provider: undefined,
+      chainId: NetworksChainId.mainnet,
     };
     this.initialize();
+    onNetworkStateChange((networkState) => {
+      if (this.config.chainId !== networkState.provider.chainId) {
+        this.configure({
+          chainId: networkState.provider.chainId,
+        });
+      }
+    });
   }
 
   /**
@@ -344,7 +361,7 @@ export class AssetsContractController extends BaseController<
     tokensToDetect: string[],
   ) {
     const contractAddress =
-      SINGLE_CALL_BALANCES_ADDRESS_BY_CHAINID[this.config.provider.chainId];
+      SINGLE_CALL_BALANCES_ADDRESS_BY_CHAINID[this.config.chainId];
     const contract = this.web3.eth
       .contract(abiSingleCallBalancesContract)
       .at(contractAddress);
