@@ -56,17 +56,17 @@ export async function fetchTokenList(
  * @param abortSignal - The abort signal used to cancel the request if necessary.
  * @returns The token metadata, or `undefined` if the request was cancelled.
  */
-export async function fetchTokenMetadata(
+export async function fetchTokenMetadata<T>(
   chainId: string,
   tokenAddress: string,
   abortSignal: AbortSignal,
-): Promise<unknown> {
+): Promise<T> {
   const tokenMetadataURL = getTokenMetadataURL(chainId, tokenAddress);
   const response = await queryApi(tokenMetadataURL, abortSignal);
   if (response) {
-    return parseJsonResponse(response);
+    return parseJsonResponse(response) as Promise<T>;
   }
-  return undefined;
+  return undefined as any;
 }
 
 /**
@@ -92,7 +92,7 @@ async function queryApi(
   fetchOptions.headers.set('Content-Type', 'application/json');
   try {
     return await timeoutFetch(apiURL, fetchOptions, timeout);
-  } catch (err) {
+  } catch (err: any) {
     if (err.name === 'AbortError') {
       console.log('Request is aborted');
     }
