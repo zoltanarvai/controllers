@@ -5,21 +5,26 @@ import { BaseController, BaseConfig, BaseState } from '../BaseController';
 import { ERC721Standard } from './Standards/CollectibleStandards/ERC721/ERC721Standard';
 import { ERC1155Standard } from './Standards/CollectibleStandards/ERC1155/ERC1155Standard';
 import { ERC20Standard } from './Standards/ERC20Standard';
-import { NetworksChainId, NetworkState } from '../network/NetworkController';
+import { NetworkState } from '../network/NetworkController';
+import { SupportedTokenDetectionNetworks } from '../util';
 
 /**
  * Check if token detection is enabled for certain networks
  *
  * @param chainId - ChainID of network
- * @returns Whether the current network supports token detection
+ * @returns - Whether the current network supports token detection
  */
 export const SINGLE_CALL_BALANCES_ADDRESS_BY_CHAINID: {
   [chainId: string]: string;
 } = {
-  [NetworksChainId.mainnet]: '0xb1f8e55c7f64d203c1400b9d8555d050f94adf39',
-  [NetworksChainId.bsc]: '0x2352c63A83f9Fd126af8676146721Fa00924d7e4',
-  [NetworksChainId.polygon]: '0x2352c63A83f9Fd126af8676146721Fa00924d7e4',
-  [NetworksChainId.avax]: '0xD023D153a0DFa485130ECFdE2FAA7e612EF94818',
+  [SupportedTokenDetectionNetworks.mainnet]:
+    '0xb1f8e55c7f64d203c1400b9d8555d050f94adf39',
+  [SupportedTokenDetectionNetworks.bsc]:
+    '0x2352c63A83f9Fd126af8676146721Fa00924d7e4',
+  [SupportedTokenDetectionNetworks.polygon]:
+    '0x2352c63A83f9Fd126af8676146721Fa00924d7e4',
+  [SupportedTokenDetectionNetworks.avax]:
+    '0xD023D153a0DFa485130ECFdE2FAA7e612EF94818',
 };
 
 const MISSING_PROVIDER_ERROR =
@@ -87,7 +92,7 @@ export class AssetsContractController extends BaseController<
     super(config, state);
     this.defaultConfig = {
       provider: undefined,
-      chainId: NetworksChainId.mainnet,
+      chainId: SupportedTokenDetectionNetworks.mainnet,
     };
     this.initialize();
     onNetworkStateChange((networkState) => {
