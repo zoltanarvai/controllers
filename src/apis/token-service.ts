@@ -66,7 +66,7 @@ export async function fetchTokenMetadata<T>(
   if (response) {
     return parseJsonResponse(response) as Promise<T>;
   }
-  return undefined as any;
+  throw new Error(`TokenService Error: No response from fetchTokenMetadata`);
 }
 
 /**
@@ -92,7 +92,7 @@ async function queryApi(
   fetchOptions.headers.set('Content-Type', 'application/json');
   try {
     return await timeoutFetch(apiURL, fetchOptions, timeout);
-  } catch (err: any) {
+  } catch (err) {
     if (err.name === 'AbortError') {
       console.log('Request is aborted');
     }
