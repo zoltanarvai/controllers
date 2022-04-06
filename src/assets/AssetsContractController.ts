@@ -2,6 +2,8 @@ import { BN } from 'ethereumjs-util';
 import Web3 from 'web3';
 import abiSingleCallBalancesContract from 'single-call-balance-checker-abi';
 import { BaseController, BaseConfig, BaseState } from '../BaseController';
+import type { PreferencesState } from '../user/PreferencesController';
+import { IPFS_DEFAULT_GATEWAY_URL } from '../constants';
 import { ERC721Standard } from './Standards/CollectibleStandards/ERC721/ERC721Standard';
 import { ERC1155Standard } from './Standards/CollectibleStandards/ERC1155/ERC1155Standard';
 import { ERC20Standard } from './Standards/ERC20Standard';
@@ -39,6 +41,7 @@ const MISSING_PROVIDER_ERROR =
 export interface AssetsContractConfig extends BaseConfig {
   provider: any;
   chainId: string;
+  ipfsGateway: string;
 }
 
 /**
@@ -74,15 +77,21 @@ export class AssetsContractController extends BaseController<
   /**
    * Creates a AssetsContractController instance.
    *
-   * @param options.config - Initial options used to configure this controller.
-   * @param options.state - Initial state to set on this controller.
-   * @param options.onPreferencesStateChange - Allows subscribing to preferences controller state changes.
+   * @param options - The controller options.
+   * @param options.onPreferencesStateChange - Allows subscribing to preference controller state changes.
+   * @param options.onNetworkStateChange - Allows subscribing to network controller state changes.
+   * @param config - Initial options used to configure this controller.
+   * @param state - Initial state to set on this controller.
    */
   constructor({
+    onPreferencesStateChange,
     onNetworkStateChange,
     config,
     state,
   }: {
+    onPreferencesStateChange: (
+      listener: (preferencesState: PreferencesState) => void,
+    ) => void;
     onNetworkStateChange: (
       listener: (networkState: NetworkState) => void,
     ) => void;
@@ -92,9 +101,13 @@ export class AssetsContractController extends BaseController<
     super(config, state);
     this.defaultConfig = {
       provider: undefined,
+      ipfsGateway: IPFS_DEFAULT_GATEWAY_URL,
       chainId: SupportedTokenDetectionNetworks.mainnet,
     };
     this.initialize();
+    onPreferencesStateChange(({ ipfsGateway }) => {
+      this.configure({ ipfsGateway });
+    });
     onNetworkStateChange((networkState) => {
       if (this.config.chainId !== networkState.provider.chainId) {
         this.configure({
@@ -185,7 +198,7 @@ export class AssetsContractController extends BaseController<
    */
   async getTokenStandardAndDetails(
     tokenAddress: string,
-    userAddress: string,
+    userAddress?: string,
     tokenId?: string,
   ): Promise<{
     standard: string;
@@ -203,10 +216,16 @@ export class AssetsContractController extends BaseController<
       throw new Error(MISSING_PROVIDER_ERROR);
     }
 
+    const { ipfsGateway } = this.config;
+
     // ERC721
     try {
       return {
-        ...(await this.erc721Standard.getDetails(tokenAddress, tokenId)),
+        ...(await this.erc721Standard.getDetails(
+          tokenAddress,
+          ipfsGateway,
+          tokenId,
+        )),
       };
     } catch {
       // Ignore
@@ -215,7 +234,11 @@ export class AssetsContractController extends BaseController<
     // ERC1155
     try {
       return {
-        ...(await this.erc1155Standard.getDetails(tokenAddress, tokenId)),
+        ...(await this.erc1155Standard.getDetails(
+          tokenAddress,
+          ipfsGateway,
+          tokenId,
+        )),
       };
     } catch {
       // Ignore

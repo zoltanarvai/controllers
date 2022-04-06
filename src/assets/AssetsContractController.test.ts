@@ -1,4 +1,6 @@
 import HttpProvider from 'ethjs-provider-http';
+import { IPFS_DEFAULT_GATEWAY_URL } from '../constants';
+import { PreferencesController } from '../user/PreferencesController';
 import { AssetsContractController } from './AssetsContractController';
 import { NetworkController } from '../network/NetworkController';
 import { SupportedTokenDetectionNetworks } from '../util';
@@ -18,18 +20,38 @@ const TEST_ACCOUNT_PUBLIC_ADDRESS =
   '0x5a3CA5cD63807Ce5e4d7841AB32Ce6B6d9BbBa2D';
 describe('AssetsContractController', () => {
   let assetsContract: AssetsContractController;
+
+  let preferences: PreferencesController;
   let network: NetworkController;
   beforeEach(() => {
+    preferences = new PreferencesController();
     network = new NetworkController();
     assetsContract = new AssetsContractController({
       onNetworkStateChange: (listener) => network.subscribe(listener),
+      onPreferencesStateChange: (listener) => preferences.subscribe(listener),
     });
   });
 
   it('should set default config', () => {
     expect(assetsContract.config).toStrictEqual({
       chainId: SupportedTokenDetectionNetworks.mainnet,
+      ipfsGateway: IPFS_DEFAULT_GATEWAY_URL,
       provider: undefined,
+    });
+  });
+
+  it('should update the ipfsGateWay config value when this value is changed in the preferences controller', () => {
+    expect(assetsContract.config).toStrictEqual({
+      ipfsGateway: IPFS_DEFAULT_GATEWAY_URL,
+      provider: undefined,
+      chainId: SupportedTokenDetectionNetworks.mainnet,
+    });
+
+    preferences.setIpfsGateway('newIPFSGateWay');
+    expect(assetsContract.config).toStrictEqual({
+      ipfsGateway: 'newIPFSGateWay',
+      provider: undefined,
+      chainId: SupportedTokenDetectionNetworks.mainnet,
     });
   });
 

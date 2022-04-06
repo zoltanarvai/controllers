@@ -94,6 +94,8 @@ describe('ComposableController', () => {
       const assetContractController = new AssetsContractController({
         onNetworkStateChange: (listener) =>
           networkController.subscribe(listener),
+        onPreferencesStateChange: (listener) =>
+          preferencesController.subscribe(listener),
       });
       const collectiblesController = new CollectiblesController({
         onPreferencesStateChange: (listener) =>
@@ -180,6 +182,8 @@ describe('ComposableController', () => {
       const assetContractController = new AssetsContractController({
         onNetworkStateChange: (listener) =>
           networkController.subscribe(listener),
+        onPreferencesStateChange: (listener) =>
+          preferencesController.subscribe(listener),
       });
       const collectiblesController = new CollectiblesController({
         onPreferencesStateChange: (listener) =>
