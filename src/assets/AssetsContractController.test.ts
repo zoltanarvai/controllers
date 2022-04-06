@@ -1,5 +1,7 @@
 import HttpProvider from 'ethjs-provider-http';
 import { AssetsContractController } from './AssetsContractController';
+import { NetworkController } from '../network/NetworkController';
+import { SupportedTokenDetectionNetworks } from '../util';
 
 const MAINNET_PROVIDER = new HttpProvider(
   'https://mainnet.infura.io/v3/341eacb578dd44a1a049cbc5f6fd4035',
@@ -16,12 +18,17 @@ const TEST_ACCOUNT_PUBLIC_ADDRESS =
   '0x5a3CA5cD63807Ce5e4d7841AB32Ce6B6d9BbBa2D';
 describe('AssetsContractController', () => {
   let assetsContract: AssetsContractController;
+  let network: NetworkController;
   beforeEach(() => {
-    assetsContract = new AssetsContractController();
+    network = new NetworkController();
+    assetsContract = new AssetsContractController({
+      onNetworkStateChange: (listener) => network.subscribe(listener),
+    });
   });
 
   it('should set default config', () => {
     expect(assetsContract.config).toStrictEqual({
+      chainId: SupportedTokenDetectionNetworks.mainnet,
       provider: undefined,
     });
   });

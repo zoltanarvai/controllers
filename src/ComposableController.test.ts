@@ -91,7 +91,10 @@ describe('ComposableController', () => {
     it('should compose controller state', () => {
       const preferencesController = new PreferencesController();
       const networkController = new NetworkController();
-      const assetContractController = new AssetsContractController();
+      const assetContractController = new AssetsContractController({
+        onNetworkStateChange: (listener) =>
+          networkController.subscribe(listener),
+      });
       const collectiblesController = new CollectiblesController({
         onPreferencesStateChange: (listener) =>
           preferencesController.subscribe(listener),
@@ -145,6 +148,8 @@ describe('ComposableController', () => {
           allIgnoredTokens: {},
           suggestedAssets: [],
           tokens: [],
+          detectedTokens: [],
+          allDetectedTokens: {},
         },
         EnsController: {
           ensEntries: {},
@@ -172,7 +177,10 @@ describe('ComposableController', () => {
     it('should compose flat controller state', () => {
       const preferencesController = new PreferencesController();
       const networkController = new NetworkController();
-      const assetContractController = new AssetsContractController();
+      const assetContractController = new AssetsContractController({
+        onNetworkStateChange: (listener) =>
+          networkController.subscribe(listener),
+      });
       const collectiblesController = new CollectiblesController({
         onPreferencesStateChange: (listener) =>
           preferencesController.subscribe(listener),
@@ -224,6 +232,8 @@ describe('ComposableController', () => {
         ignoredCollectibles: [],
         ignoredTokens: [],
         allIgnoredTokens: {},
+        detectedTokens: [],
+        allDetectedTokens: {},
         ipfsGateway: 'https://ipfs.io/ipfs/',
         lostIdentities: {},
         network: 'loading',

@@ -23,7 +23,9 @@ describe('CollectibleDetectionController', () => {
   beforeEach(async () => {
     preferences = new PreferencesController();
     network = new NetworkController();
-    assetsContract = new AssetsContractController();
+    assetsContract = new AssetsContractController({
+      onNetworkStateChange: (listener) => network.subscribe(listener),
+    });
     collectiblesController = new CollectiblesController({
       onPreferencesStateChange: (listener) => preferences.subscribe(listener),
       onNetworkStateChange: (listener) => network.subscribe(listener),

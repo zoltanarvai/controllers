@@ -122,7 +122,10 @@ describe('TokenBalancesController', () => {
         getSelectedAddress: () => preferences.state.selectedAddress,
         getERC20BalanceOf: stub().returns(new BN(1)),
       },
-      { interval: 1337, tokens: [{ address, decimals: 18, symbol: 'EOS' }] },
+      {
+        interval: 1337,
+        tokens: [{ address, decimals: 18, symbol: 'EOS', aggregators: [] }],
+      },
     );
     expect(tokenBalances.state.contractBalances).toStrictEqual({});
 
@@ -156,7 +159,10 @@ describe('TokenBalancesController', () => {
         getSelectedAddress: () => preferences.state.selectedAddress,
         getERC20BalanceOf: getERC20BalanceOfStub,
       },
-      { interval: 1337, tokens: [{ address, decimals: 18, symbol: 'EOS' }] },
+      {
+        interval: 1337,
+        tokens: [{ address, decimals: 18, symbol: 'EOS', aggregators: [] }],
+      },
     );
 
     expect(tokenBalances.state.contractBalances).toStrictEqual({});
@@ -181,8 +187,10 @@ describe('TokenBalancesController', () => {
   });
 
   it('should subscribe to new sibling assets controllers', async () => {
-    const assetsContract = new AssetsContractController();
     const network = new NetworkController();
+    const assetsContract = new AssetsContractController({
+      onNetworkStateChange: (listener) => network.subscribe(listener),
+    });
     const preferences = new PreferencesController();
     const tokensController = new TokensController({
       onPreferencesStateChange: (listener) => preferences.subscribe(listener),
