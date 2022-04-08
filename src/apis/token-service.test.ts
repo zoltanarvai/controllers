@@ -168,4 +168,16 @@ describe('FetchtokenList', () => {
 
     expect(token).toStrictEqual(sampleToken);
   });
+
+  it('should call the tokens api and return undefined', async () => {
+    const { signal } = new AbortController();
+    nock(TOKEN_END_POINT_API)
+      .get(`/tokens/${NetworksChainId.mainnet}`)
+      .reply(404, undefined)
+      .persist();
+
+    const tokens = await fetchTokenList(NetworksChainId.mainnet, signal);
+
+    expect(tokens).toStrictEqual(undefined);
+  });
 });
