@@ -104,7 +104,7 @@ function getTokenListMessenger() {
   >({
     name: 'TokenListController',
   });
-  return messenger;
+  return { messenger, controllerMessenger };
 }
 
 /**
@@ -146,7 +146,7 @@ describe('TokenDetectionController', () => {
       .get(`/tokens/${NetworksChainId.mainnet}`)
       .reply(200, sampleTokenList)
       .persist();
-    const messenger = getTokenListMessenger();
+    const { messenger, controllerMessenger } = getTokenListMessenger();
     tokenList = new TokenListController({
       chainId: NetworksChainId.mainnet,
       onNetworkStateChange: (listener) => network.subscribe(listener),
@@ -158,6 +158,11 @@ describe('TokenDetectionController', () => {
       onTokensStateChange: (listener) => tokensController.subscribe(listener),
       onPreferencesStateChange: (listener) => preferences.subscribe(listener),
       onNetworkStateChange: (listener) => network.subscribe(listener),
+      onTokenListStateChange: (listener) =>
+        controllerMessenger.subscribe(
+          `TokenListController:stateChange`,
+          listener,
+        ),
       getBalancesInSingleCall: (getBalancesInSingleCall as unknown) as AssetsContractController['getBalancesInSingleCall'],
       addDetectedTokens: tokensController.addDetectedTokens.bind(
         tokensController,
@@ -194,6 +199,7 @@ describe('TokenDetectionController', () => {
         TokenDetectionController.prototype,
         'detectTokens',
       );
+      const { controllerMessenger } = getTokenListMessenger();
       const tokenDetectionController = new TokenDetectionController(
         {
           onTokensStateChange: (listener) =>
@@ -201,6 +207,11 @@ describe('TokenDetectionController', () => {
           onPreferencesStateChange: (listener) =>
             preferences.subscribe(listener),
           onNetworkStateChange: (listener) => network.subscribe(listener),
+          onTokenListStateChange: (listener) =>
+            controllerMessenger.subscribe(
+              `TokenListController:stateChange`,
+              listener,
+            ),
           getBalancesInSingleCall: assetsContract.getBalancesInSingleCall.bind(
             assetsContract,
           ),
@@ -241,6 +252,7 @@ describe('TokenDetectionController', () => {
         TokenDetectionController.prototype,
         'detectTokens',
       );
+      const { controllerMessenger } = getTokenListMessenger();
       new TokenDetectionController(
         {
           onTokensStateChange: (listener) =>
@@ -248,6 +260,11 @@ describe('TokenDetectionController', () => {
           onPreferencesStateChange: (listener) =>
             preferences.subscribe(listener),
           onNetworkStateChange: (listener) => network.subscribe(listener),
+          onTokenListStateChange: (listener) =>
+            controllerMessenger.subscribe(
+              `TokenListController:stateChange`,
+              listener,
+            ),
           getBalancesInSingleCall: assetsContract.getBalancesInSingleCall.bind(
             assetsContract,
           ),
@@ -488,38 +505,6 @@ describe('TokenDetectionController', () => {
       },
     ]);
   });
-
-  // TODO - Fix
-  // it('should call getBalancesInSingle with token address that is not present on the asset state', async () => {
-  //   tokenDetection.configure({
-  //     networkType: MAINNET,
-  //     selectedAddress: '0x1',
-  //     chainId: NetworksChainId.mainnet,
-  //   });
-  //   getBalancesInSingleCall.resolves({
-  //     '0x6810e776880c02933d47db1b9fc05908e5386b96': new BN(1),
-  //   });
-  //   const tokensToDetect: string[] = Object.keys(tokenList.state.tokenList);
-  //   await tokenDetection.detectTokens();
-  //   expect(
-  //     getBalancesInSingleCall
-  //       .getCall(0)
-  //       .calledWithExactly('0x1', tokensToDetect),
-  //   ).toBe(true);
-
-  //   getBalancesInSingleCall.resolves({
-  //     '0x514910771af9ca656af840dff83e8264ecf986ca': new BN(1),
-  //   });
-  //   const updatedTokensToDetect = tokensToDetect.filter(
-  //     (address) => address !== '0x6810e776880c02933d47db1b9fc05908e5386b96',
-  //   );
-  //   await tokenDetection.detectTokens();
-  //   expect(
-  //     getBalancesInSingleCall
-  //       .getCall(1)
-  //       .calledWithExactly('0x1', updatedTokensToDetect),
-  //   ).toBe(true);
-  // });
 
   it('should not autodetect tokens that exist in the ignoreList', async () => {
     tokenDetection.configure({
