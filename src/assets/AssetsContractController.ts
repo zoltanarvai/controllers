@@ -4,17 +4,17 @@ import abiSingleCallBalancesContract from 'single-call-balance-checker-abi';
 import { BaseController, BaseConfig, BaseState } from '../BaseController';
 import type { PreferencesState } from '../user/PreferencesController';
 import { IPFS_DEFAULT_GATEWAY_URL } from '../constants';
+import { SupportedTokenDetectionNetworks } from '../util';
 import { ERC721Standard } from './Standards/CollectibleStandards/ERC721/ERC721Standard';
 import { ERC1155Standard } from './Standards/CollectibleStandards/ERC1155/ERC1155Standard';
 import { ERC20Standard } from './Standards/ERC20Standard';
 import { NetworkState } from '../network/NetworkController';
-import { SupportedTokenDetectionNetworks } from '../util';
 
 /**
  * Check if token detection is enabled for certain networks
  *
  * @param chainId - ChainID of network
- * @returns - Whether the current network supports token detection
+ * @returns Whether the current network supports token detection
  */
 export const SINGLE_CALL_BALANCES_ADDRESS_BY_CHAINID: {
   [chainId: string]: string;
@@ -80,8 +80,8 @@ export class AssetsContractController extends BaseController<
    * @param options - The controller options.
    * @param options.onPreferencesStateChange - Allows subscribing to preference controller state changes.
    * @param options.onNetworkStateChange - Allows subscribing to network controller state changes.
-   * @param config - Initial options used to configure this controller.
-   * @param state - Initial state to set on this controller.
+   * @param options.config - Initial options used to configure this controller.
+   * @param options.state - Initial state to set on this controller.
    */
   constructor({
     onPreferencesStateChange,
@@ -105,9 +105,11 @@ export class AssetsContractController extends BaseController<
       chainId: SupportedTokenDetectionNetworks.mainnet,
     };
     this.initialize();
+
     onPreferencesStateChange(({ ipfsGateway }) => {
       this.configure({ ipfsGateway });
     });
+
     onNetworkStateChange((networkState) => {
       if (this.config.chainId !== networkState.provider.chainId) {
         this.configure({
