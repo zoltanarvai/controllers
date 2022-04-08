@@ -1302,6 +1302,7 @@ describe('isTokenDetectionEnabledForNetwork', () => {
       ),
     ).toBe(true);
   });
+
   it('returns true for custom network such as BSC', () => {
     expect(
       util.isTokenDetectionEnabledForNetwork(
@@ -1309,6 +1310,7 @@ describe('isTokenDetectionEnabledForNetwork', () => {
       ),
     ).toBe(true);
   });
+
   it('returns false for testnets such as Ropsten', () => {
     expect(
       util.isTokenDetectionEnabledForNetwork(NetworksChainId.ropsten),
